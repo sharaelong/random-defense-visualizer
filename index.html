@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Histogram Visualizer</title>
+</head>
+<body>
+    <h1>Histogram Visualizer</h1>
+    <form id="rangeForm">
+        Range from: <input type="number" id="rangeFrom" min="1" max="30" required>
+        to: <input type="number" id="rangeTo" min="1" max="30" required>
+        <input type="submit" value="Draw Histogram">
+    </form>
+    <br>
+    <img id="histogram" src="" alt="Histogram will be displayed here">
+    <script>
+        document.getElementById('rangeForm').onsubmit = function(event) {
+            event.preventDefault();
+            var rangeFrom = document.getElementById('rangeFrom').value;
+            var rangeTo = document.getElementById('rangeTo').value;
+            document.getElementById('histogram').src = 'http://localhost:8000/drawfig/' + rangeFrom + '/' + rangeTo;
+        };
+    </script>
+</body>
+</html>
