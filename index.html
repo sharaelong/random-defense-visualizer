@@ -12,11 +12,13 @@
     </form>
     <br>
     <img id="histogram" src="" alt="Histogram will be displayed here">
+    <img id="ratio" src="" alt="Histogram will be displayed here">
     <script>
         document.getElementById('rangeForm').onsubmit = function(event) {
             event.preventDefault();
             var rangeFrom = document.getElementById('rangeFrom').value;
             var rangeTo = document.getElementById('rangeTo').value;
+            document.getElementById('ratio').src = 'http://localhost:8000/drawratio';
             document.getElementById('histogram').src = 'http://localhost:8000/drawfig/' + rangeFrom + '/' + rangeTo;
         };
     </script>

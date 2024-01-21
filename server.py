@@ -17,6 +17,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             with open('fig.png', 'rb') as file:
                 self.wfile.write(file.read())
+        elif self.path.startswith('/drawratio'):
+            self.send_response(200)
+            self.send_header('Content-type', 'image/png')
+            self.end_headers()
+            with open('ratio.png', 'rb') as file:
+                self.wfile.write(file.read())
         else:
             self.send_response(404)
             self.end_headers()
