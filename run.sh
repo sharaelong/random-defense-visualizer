@@ -66,6 +66,9 @@ for line in sys.stdin:
     else:
         dt = int(splits[0]) * 60 * 60 + int(splits[1]) * 60 + int(splits[2])
 
+    if dt > 3600:
+        continue
+
     data[group].append(dt)
 
     df0 = pd.DataFrame({ "Value": data[0], "Level": "Easy Gold" })
@@ -90,7 +93,7 @@ ax.set_xlim(0, 3600)
 ax.set_xticks(range(0, 3601, 300))
 ax.get_figure().savefig("fig.png")
 
-percentage = [len(data[i]) / try_cnt[i] * 100 for i in range(len(try_cnt))]
+percentage = [0 if try_cnt[i] == 0 else len(data[i]) / try_cnt[i] * 100 for i in range(len(try_cnt))]
 tmp_data = {
     "Sector": ["Easy Gold", "Hard Gold", "Easy Plat", "Hard Plat", "Diamond+"],
     "Percentage": percentage,
