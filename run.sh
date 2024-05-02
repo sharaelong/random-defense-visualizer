@@ -25,11 +25,11 @@ fetchprob() {
 }
 
 fetchprobs() {
-	cat rpd.txt | awk 'NF==4{print $1}' | xargs -P8 -n1 "$0" fetchprob
+	cat "$1" | awk 'NF==4{print $1}' | xargs -P8 -n1 "$0" fetchprob
 }
 
 drawfig() {
-	cat rpd.txt | .venv/bin/python3 -c '
+	cat "$1" | .venv/bin/python3 -c '
 import sys
 import subprocess
 import json
