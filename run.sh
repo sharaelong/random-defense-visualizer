@@ -32,16 +32,24 @@ drawfig() {
 	cat rpd.txt | .venv/bin/python3 -c '
 import sys
 import subprocess
+import json
 import pandas as pd
 data = [[],[],[],[],[]]
 try_cnt = [0,0,0,0,0]
+time_threshold = 1800
+result_per_tag = {}
 # args = sys.argv[1:]
 for line in sys.stdin:
     if len(line.split()) == 1: continue
     probid, result, timestr, _ = line.split()
 
-    level = subprocess.run("cat problems/" + probid + ".json | jq .level", stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-    level = int(level.stdout.strip())
+#    level = subprocess.run("cat problems/" + probid + ".json | jq .level", stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+#    level = int(level.stdout.strip())
+
+    with open("problems/" + probid + ".json", "r") as file:
+         jsondata = json.load(file)
+
+    level = int(jsondata["level"])
 
     group = -1
     if 11 <= level and level <= 13:
@@ -57,16 +65,26 @@ for line in sys.stdin:
 
     try_cnt[group] += 1
 
-    if result == "fail":
-       continue
-
     splits = timestr.split(":")
     if len(splits) == 2:
         dt = int(splits[0]) * 60 + int(splits[1])
     else:
         dt = int(splits[0]) * 60 * 60 + int(splits[1]) * 60 + int(splits[2])
 
-    if dt > 3600:
+    for tag in jsondata["tags"]:
+        tag_key = tag["key"]
+        if tag_key not in result_per_tag:
+           result_per_tag[tag_key] = ([], [])
+
+        if result != "fail" and dt <= time_threshold:
+           result_per_tag[tag_key][0].append(level)
+        else:
+           result_per_tag[tag_key][1].append(level)
+
+    if result == "fail":
+       continue
+
+    if dt > time_threshold:
         continue
 
     data[group].append(dt)
@@ -86,11 +104,16 @@ palette = {
     "Diamond+": "#00B4FC",
 }
 
+# for tag_key, (success_tiers, fail_tiers) in result_per_tag.items():
+#     print(f"Tag: {tag_key}")
+#     print(f"  Success Tiers: {sorted(success_tiers)}")
+#     print(f"  Fail Tiers: {sorted(fail_tiers)}")
+
 import matplotlib.pyplot as plt
 import seaborn as sns
-ax = sns.histplot(data=combined_df, x="Value", hue="Level", palette=palette, stat="count", multiple="stack", bins=range(0, 3601, 300), fill=True)
-ax.set_xlim(0, 3600)
-ax.set_xticks(range(0, 3601, 300))
+ax = sns.histplot(data=combined_df, x="Value", hue="Level", palette=palette, stat="count", multiple="stack", bins=range(0, time_threshold+1, time_threshold // 12), fill=True)
+ax.set_xlim(0, time_threshold)
+ax.set_xticks(range(0, time_threshold+1, time_threshold // 12))
 ax.get_figure().savefig("fig.png")
 
 percentage = [0 if try_cnt[i] == 0 else len(data[i]) / try_cnt[i] * 100 for i in range(len(try_cnt))]
